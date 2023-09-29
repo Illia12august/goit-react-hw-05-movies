@@ -1,50 +1,71 @@
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Suspense, useEffect, useRef, useState } from 'react';
+import { Link, Outlet, useLocation, useParams } from 'react-router-dom';
 import { getMovies } from 'services/Movies-API';
 
-const emptyImage =
-  'https://apps-mea.element.com/SIMS/Images/loginhead.jpg?AspxAutoDetectCookieSupport=1';
-
-const Cast = () => {
+const MovieDetails = () => {
   const { id } = useParams();
-
-  const [cast, setCast] = useState([]);
+  const [movie, setMovie] = useState(null);
+  const [genres, setGenres] = useState([]);
+  const [movieVotes, setMovieVotes] = useState(null);
+  const location = useLocation();
+  const backLocation = useRef(location.state?.from ?? '/');
 
   useEffect(() => {
-    const getMovieCast = async id => {
+    const getMovieDetails = async id => {
       try {
-        const response = await getMovies(`/movie/${id}/credits`);
-        setCast(response.data.cast);
+        const response = await getMovies(`/movie/${id}?language=en-US`);
+        setMovie(response.data);
+        setGenres(response.data.genres);
+        setMovieVotes(response.data.vote_average);
       } catch (error) {
         console.log(error);
       }
     };
 
-    getMovieCast(id);
+    getMovieDetails(id);
   }, [id]);
 
+  const movieGenres = genres.map(genre => genre.name).join(', ');
+  const movieScore = (movieVotes * 10).toFixed(0);
+
+  if (!movie) return <div>Loading...</div>;
+
+  const { title, overview, poster_path } = movie;
+
   return (
-    <div>
-      <ul>
-        {cast.map(item => {
-          const { id, name, profile_path } = item;
-          return (
-            <li key={id}>
-              <img
-                src={`https://image.tmdb.org/t/p/w200${profile_path}`}
-                alt={name}
-                onError={e => {
-                  e.target.onerror = null;
-                  e.target.src = emptyImage;
-                }}
-              />
-              <p>{name}</p>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
+    <>
+      <div>
+        <img
+          src={`https://image.tmdb.org/t/p/w300${poster_path}`}
+          alt={`poster of ${title} movie`}
+        ></img>
+        <div>
+          <Link to={backLocation.current}>Back</Link>
+          <h2>{title}</h2>
+          <p>User Score: {movieScore} %</p>
+          <b>Overview</b>
+          <p>{overview}</p>
+          <b>Genres: </b>
+          <p>{movieGenres}</p>
+        </div>
+      </div>
+      <hr></hr>
+      <p>Additional information</p>
+      <div>
+        <ul>
+          <li>
+            <Link to={`/movies/${id}/cast`}>Cast</Link>
+          </li>
+          <li>
+            <Link to={`/movies/${id}/reviews`}>Reviews</Link>
+          </li>
+        </ul>
+      </div>
+      <Suspense fallback={<div>Loading</div>}>
+        <Outlet />
+      </Suspense>
+    </>
   );
 };
 
-export default Cast;
+export default MovieDetails;

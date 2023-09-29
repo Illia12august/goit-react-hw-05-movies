@@ -5,7 +5,7 @@ const options = {
   headers: {
     accept: 'application/json',
     Authorization:
-      'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJlODNhOGJlZjFhMmU4ODczYTFiZjQ5ZTBiOTI3OTM2MSIsInN1YiI6IjY1MTA2ZWVlNmY1M2UxMGFhM2MwOTM5YiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.-AqFi4Ss4g_d6MC-fD12PXzPrdZqYRXqK7d12UQhYSM',
+      'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJmNDU5MDZhNjdiYjRmODc1NTE2MjUxMWYwYmMwZmZjNSIsInN1YiI6IjY0ZTc4OGRlYzYxM2NlMDE0ZGZiODg4MCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ._mEzgbWM_HLA1BRaNaEMWbU8KxVgihcTDELuXNFHkmI',
   },
 };
 
@@ -14,6 +14,7 @@ export const getMovies = async endpoint => {
     const response = await axios.get(`${BASE_URL}${endpoint}`, options);
     return response;
   } catch (error) {
-    console.log('Error fetching movies:', error);
+    console.error('Error fetching movies:', error);
+    throw error;
   }
 };
